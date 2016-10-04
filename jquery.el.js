@@ -7,6 +7,8 @@
 (function ($) {
 	function startNextToken(char) {
 		switch (char) {
+			case null:
+				return;
 			case "#":
 				return {
 					type: "id",
