@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width">
+		<title>QUnit Example</title>
+		<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.0.1.css">
+	</head>
+
+	<body>
+		<div id="qunit"></div>
+		<div id="qunit-fixture"></div>
+		<script src="https://code.jquery.com/qunit/qunit-2.0.1.js"></script>
+		<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+		<script src="./blanket.js"></script>
+		<script src="../jquery.el.js" data-cover></script>
+		<script>
+			function eq(title, tag, expected) {
+				QUnit.test(title, function(assert) {
+					var actual = $.el(tag)[0].outerHTML;
+					assert.ok(actual === expected, actual + " != " + expected);
+				});
+			}
+
+			function err(title, tag, expected) {
+				QUnit.test(title, function(assert) {
+					var actual;
+					try {
+						$.el(tag)[0].outerHTML;
+					} catch (error) {
+						actual = error;
+					}
+					assert.ok(actual === expected, actual + " != " + expected);
+				});
+			}
+			var undef;
+			eq("undefined", undef, '<div></div>');
+			eq("nothing", "", '<div></div>');
+			err("number", 1, "invalid input");
+			eq("space", " ", '<div></div>');
+
+			eq("tag", "span", '<span></span>');
+			eq("tag spaces", " span ", '<span></span>');
+
+			eq("id", "#div", '<div id="div"></div>');
+			err("id empty", "#", "id cannot be empty");
+			eq("id spaces", " #div ", '<div id="div"></div>');
+			err("ids multiple", "#div1#div2", "cannot have multiple ids");
+			err("ids invalid char", "#div1!", "'!' is not a valid start of a token");
+			err("ids invalid char", "#!div1", "'!' is not a valid id character");
+
+			eq("class", ".div", '<div class="div"></div>');
+			err("class empty", ".", "class cannot be empty");
+			eq("class multiple", ".div1.div2", '<div class="div1 div2"></div>');
+			err("class invalid char", ".!div1", "'!' is not a valid class character");
+
+			eq("attr only no quote", "[data-test=test]", '<div data-test="test"></div>');
+			eq("attr only single quote", "[data-test='test']", '<div data-test="test"></div>');
+			eq("attr only double quote", "[data-test=\"test\"]", '<div data-test="test"></div>');
+			eq("attr single quote in no quote", "[data-test=t'est]", '<div data-test="t\'est"></div>');
+			eq("attr double quote in no quote", "[data-test=t\"est]", '<div data-test="t&quot;est"></div>');
+			eq("attr spaces no quotes", "[ data-test = test ]", '<div data-test="test"></div>');
+			eq("attr spaces single quotes", "[ data-test = ' test ' ]", '<div data-test=" test "></div>');
+			eq("attr spaces double quotes", "[ data-test = \" test \" ]", '<div data-test=" test "></div>');
+			eq("attr single quotes in double quoted attr value", "[data-test=\"'test\"]", '<div data-test="\'test"></div>');
+			eq("attr escaped double quotes in double quoted attr value", "[data-test=\"\\\"test\"]", '<div data-test="&quot;test"></div>');
+			eq("attr escaped double quotes in single quoted attr value", "[data-test='\\\"test']", '<div data-test="&quot;test"></div>');
+			eq("attr escaped single quotes in single quoted attr value", "[data-test='\\'test']", '<div data-test="\'test"></div>');
+			eq("attr escaped single quotes in double quoted attr value", "[data-test=\"\\'test\"]", '<div data-test="\'test"></div>');
+			eq("attr multiple", "[data-test1='test1' data-test2='test2']", '<div data-test1="test1" data-test2="test2"></div>');
+			eq("attr multiple no strings", "[data-test1=test1 data-test2=test2]", '<div data-test1="test1" data-test2="test2"></div>');
+			eq("attr multiple brackets", "[data-test1='test1'][data-test2='test2']", '<div data-test1="test1" data-test2="test2"></div>');
+			eq("attr empty", "[]", '<div></div>');
+			eq("attr empty value", "[data-test]", '<div data-test=""></div>');
+			eq("attr empty value before next attr", "[data-test data-test1='test1']", '<div data-test="" data-test1="test1"></div>');
+			eq("attr no space between attrs", "[data-test1='test1'data-test2='test2']", '<div data-test1="test1" data-test2="test2"></div>');
+			eq("attr new line in value", "[data-test1='tes\nt1']", '<div data-test1="tes\nt1"></div>');
+			eq("attr non-escaped \\ in string", "[data-test1='test\\1']", '<div data-test1="test\\1"></div>');
+			eq("attr non-escaped \\ in string at end of attr", "[data-test1='test\\ ]", '<div data-test1="test\\"></div>');
+			eq("attr non-escaped \\ not in string", "[data-test1=test\\1]", '<div data-test1="test\\1"></div>');
+			eq("attr non-escaped \\ not in string at end of attr", "[data-test1=test\\ ]", '<div data-test1="test\\"></div>');
+			err("attr non-escaped \\ at end of attr missing ]", "[data-test1=test\\", "missing ']' at end of attributes token");
+			err("attr missing ]", "[data-test1=test", "missing ']' at end of attributes token");
+			eq("attr escaped ]", "[data-test1='test1\\]']", '<div data-test1="test1]"></div>');
+			eq("attr escaped ] no quotes", "[data-test1=test1\\]]", '<div data-test1="test1]"></div>');
+			eq("attr escaped \\", "[data-test1='test1\\\\']", '<div data-test1="test1\\"></div>');
+			eq("attr escaped \\ no quotes", "[data-test1=test1\\\\]", '<div data-test1="test1\\"></div>');
+			eq("attr escaped \\ and ]", "[data-test1='test1\\\\\\]']", '<div data-test1="test1\\]"></div>');
+			eq("attr escaped \\ and ] no quotes", "[data-test1=test1\\\\\\]]", '<div data-test1="test1\\]"></div>');
+			err("attr invalid name char after empty attr", "[data-test1 :data-test]", "':' is not a valid attribute name character");
+			err("attr invalid name char", "[d:ata-test]", "':' is not a valid attribute name character");
+			err("attr invalid name char", "[:data-test]", "':' is not a valid attribute name character");
+
+			eq("text", "{test}", '<div>test</div>');
+			eq("text escaped }", "{test\\}}", '<div>test}</div>');
+			eq("text escaped \\", "{test\\\\}", '<div>test\\</div>');
+			eq("text non-escaped \\", "{test\\1}", '<div>test\\1</div>');
+			err("text non-escaped \\ at end of text missing }", "{test\\", "missing '}' at end of text token");
+			eq("text new line", "{te\nst}", '<div>te\nst</div>');
+			eq("text spaces around", "{ test }", '<div> test </div>');
+			err("text", "{test", "missing '}' at end of text token");
+
+			eq("usual", "span#test.t1.t2[data-test1='test1' data-test2='test2']{text}", '<span id="test" class="t1 t2" data-test1="test1" data-test2="test2">text</span>');
+			eq("checkbox", "input#id.class[type='checkbox' name='name' checked]", '<input id="id" class="class" type="checkbox" name="name" checked="checked">');
+
+			QUnit.test("append el", function(assert) {
+				var $div = $("<div/>");
+				$div.el("span");
+				var actual = $div[0].outerHTML;
+				var expected = "<div><span></span></div>";
+				assert.ok(actual === expected, actual + " != " + expected);
+			});
+		</script>
+	</body>
+
+</html>

@@ -35,8 +35,10 @@
 	}
 
 	function parseAttrs(attrs, text) {
+		text = text.trim();
+		var token = "next";
 		var inString = false;
-		var inName = true;
+		var inWhitespace = false;
 		var attr = {
 			name: "",
 			value: ""
@@ -45,59 +47,133 @@
 			var char = null;
 			if (i < text.length) {
 				char = text[i];
-			} else {
-				if (attr.name.trim()) {
-					attrs[attr.name.trim()] = attr.value.trim();	
-				}
-				return;
-			}
-			if (inName) {
-				if (char === "=") {
-					inName = false;
-				} else {
-					attr.name += char;
-				}
-			} else {
-				if (inString) {
-					if (char === inString) {
-						// TODO: check for slash
-						inString = false;
-						attrs[attr.name.trim()] = attr.value.trim();
-						attr = {
-							name: "",
-							value: ""
-						};
-						inName = true;
-					} else {
-						attr.value += char;
-					}
-				} else {
-					if (char === " " && attr.value.trim()) {
-						attrs[attr.name.trim()] = attr.value.trim();
-						attr = {
-							name: "",
-							value: ""
-						};
-						inName = true;
-					} else if (/["']/.test(char)) {
-						if (attr.value.trim()) {
-							attr.value += char;
+				switch (token) {
+					case "name":
+						if (char === "=") {
+							token = "equals";
+							inWhitespace = false;
+						} else if (/\s/.test(char)) {
+							inWhitespace = true;
+						} else if (inWhitespace) {
+							// empty attr
+							attrs[attr.name] = "";
+							attr = {
+								name: "",
+								value: ""
+							};
+							inWhitespace = false;
+							token = "name";
+							if (/[\w-]/.test(char)) {
+								attr.name += char;
+							} else {
+								throw "'" + char + "' is not a valid attribute name character";
+							}
+						} else if (/[\w-]/.test(char)) {
+							attr.name += char;
 						} else {
-							inString = char;
+							throw "'" + char + "' is not a valid attribute name character";
 						}
-					} else {
-						attr.value += char;
-					}
+						break;
+					case "equals":
+						if (/\s/.test(char)) {
+							// ignore whitespace
+						} else if (/["']/.test(char)) {
+							inString = char;
+							token = "value";
+						} else {
+							attr.value += char;
+							token = "value";
+						}
+						break;
+					case "value":
+						if (inString) {
+							if (char === "\\") {
+								if (text.length > i + 1) {
+									var nextInStringChar = text[i + 1];
+									switch (nextInStringChar) {
+										case "\\":
+										case "'":
+										case "\"":
+											attr.value += nextInStringChar;
+											i++;
+											break;
+										default:
+											attr.value += char;
+									}
+								} else {
+									attr.value += char;
+								}
+							} else if (char === inString) {
+								inString = false;
+								attrs[attr.name] = attr.value;
+								attr = {
+									name: "",
+									value: ""
+								};
+								token = "next";
+							} else {
+								attr.value += char;
+							}
+						} else {
+							if (char === "\\") {
+								if (text.length > i + 1) {
+									var nextChar = text[i + 1];
+									switch (nextChar) {
+										case "\\":
+											attr.value += nextChar;
+											i++;
+											break;
+										default:
+											attr.value += char;
+									}
+								} else {
+									attr.value += char;
+								}
+							} else if (/\s/.test(char)) {
+								attrs[attr.name] = attr.value;
+								attr = {
+									name: "",
+									value: ""
+								};
+								token = "next";
+							} else {
+								attr.value += char;
+							}
+						}
+						break;
+					case "next":
+						if (/[\w-]/.test(char)) {
+							inWhitespace = false;
+							attr.name += char;
+							token = "name";
+						} else if (/[^\s]/.test(char)) {
+							throw "'" + char + "' is not a valid attribute name character";
+						}
+						break;
+					default:
+						// this should never happen
+						throw "'" + token + "' is an invalid token";
+				}
+			} else {
+				if (attr.name) {
+					attrs[attr.name] = attr.value;
 				}
 			}
 		}
 		return attrs;
 	}
 
-	function parseTag(tag) {
+	function parseTag(text) {
+		if (typeof text === "undefined") {
+			text = "";
+		}
+		if (typeof text !== "string") {
+			throw "invalid input";
+		}
+		text = text.trim();
 		var el = {
 			tag: "div",
-			id: "",
+			id: null,
 			classes: [],
 			attrs: {},
 			text: ""
@@ -106,45 +182,79 @@
 			type: "tag",
 			value: "",
 		};
-		for (var i = 0; i <= tag.length; i++) {
+		for (var i = 0; i <= text.length; i++) {
 
 			var char = null;
-			if (i < tag.length) {
-				char = tag[i];
+			if (i < text.length) {
+				char = text[i];
 			}
 			switch (token.type) {
 				case "tag":
 					if (char && /\w/.test(char)) {
 						token.value += char;
 					} else {
-						el.tag = token.value || "div";
+						if (token.value) {
+							el.tag = token.value;
+						}
 						token = startNextToken(char);
 					}
 					break;
 				case "id":
-					if (char && /\w/.test(char)) {
+					if (char && /[\w-]/.test(char)) {
 						token.value += char;
 					} else {
 						if (!token.value) {
-							throw "'" + token.value + "' is not a valid id";
+							if (char === null) {
+								throw "id cannot be empty";
+							} else {
+								throw "'" + char + "' is not a valid id character";
+							}
 						}
-						el.id = token.value;
-						token = startNextToken(char);
+						if (el.id) {
+							throw "cannot have multiple ids";
+						} else {
+							el.id = token.value;
+							token = startNextToken(char);
+						}
 					}
 					break;
 				case "class":
-					if (char && /\w/.test(char)) {
+					if (char && /[\w-]/.test(char)) {
 						token.value += char;
 					} else {
 						if (!token.value) {
-							throw "'" + token.value + "' is not a valid class";
+							if (char === null) {
+								throw "class cannot be empty";
+							} else {
+								throw "'" + char + "' is not a valid class character";
+							}
 						}
 						el.classes.push(token.value);
 						token = startNextToken(char);
 					}
 					break;
 				case "attrs":
-					if (char && /[^\]]/.test(char)) {
+					if (char === null) {
+						throw "missing ']' at end of attributes token";
+					} else if (char === "\\") {
+						if (text.length > i + 1) {
+							var nextAttrChar = text[i + 1];
+							switch (nextAttrChar) {
+								case "\\":
+									token.value += "\\\\";
+									i++;
+									break;
+								case "]":
+									token.value += nextAttrChar;
+									i++;
+									break;
+								default:
+									token.value += char;
+							}
+						} else {
+							token.value += char;
+						}
+					} else if (/[^\]]/.test(char)) {
 						token.value += char;
 					} else {
 						parseAttrs(el.attrs, token.value);
@@ -154,7 +264,24 @@
 					}
 					break;
 				case "text":
-					if (char && /[^}]/.test(char)) {
+					if (char === null) {
+						throw "missing '}' at end of text token";
+					} else if (char === "\\") {
+						if (text.length > i + 1) {
+							var nextTextChar = text[i + 1];
+							switch (nextTextChar) {
+								case "\\":
+								case "}":
+									token.value += nextTextChar;
+									i++;
+									break;
+								default:
+									token.value += char;
+							}
+						} else {
+							token.value += char;
+						}
+					} else if (/[^}]/.test(char)) {
 						token.value += char;
 					} else {
 						el.text = token.value;
@@ -169,13 +296,15 @@
 					}
 					break;
 				default:
+					// this should never happen
 					throw "'" + token.type + "' is not a valid token type";
 			}
 		}
 		return el;
 	}
-	$.el = function (tag) {
-		var el = parseTag(tag);
+
+	$.el = function (text) {
+		var el = parseTag(text);
 		var $el = $("<" + el.tag + " />");
 		if (el.id) {
 			$el.attr({ id: el.id });
@@ -191,6 +320,7 @@
 		}
 		return $el;
 	};
+
 	$.fn.el = function (tag) {
 		var $el = $.el(tag);
 		this.append($el);
