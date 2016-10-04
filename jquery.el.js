@@ -168,7 +168,7 @@
 		return attrs;
 	}
 
-	function parseTag(text) {
+	function parseText(text) {
 		if (typeof text === "undefined") {
 			text = "";
 		}
@@ -309,7 +309,7 @@
 	}
 
 	$.el = function (text) {
-		var el = parseTag(text);
+		var el = parseText(text);
 		var $el = $("<" + el.tag + " />");
 		if (el.id) {
 			$el.attr({ id: el.id });
@@ -326,9 +326,11 @@
 		return $el;
 	};
 
-	$.fn.el = function (tag) {
-		var $el = $.el(tag);
-		this.append($el);
+	$.fn.el = function (text, returnParent) {
+		var $el = $.el(text).appendTo(this);
+		if (returnParent) {
+			return this;
+		}
 		return $el;
 	};
 })(jQuery);
