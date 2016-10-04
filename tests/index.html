@@ -6,6 +6,15 @@
 		<meta name="viewport" content="width=device-width">
 		<title>QUnit Example</title>
 		<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.0.1.css">
+		<style>
+			.test-message {
+				white-space: pre;
+			}
+
+			ol.qunit-assert-list li {
+				list-style: none;
+			}
+		</style>
 	</head>
 
 	<body>
@@ -16,22 +25,22 @@
 		<script src="./blanket.js"></script>
 		<script src="../jquery.el.js" data-cover></script>
 		<script>
-			function eq(title, tag, expected) {
+			function eq(title, text, expected) {
 				QUnit.test(title, function(assert) {
-					var actual = $.el(tag)[0].outerHTML;
-					assert.ok(actual === expected, actual + " != " + expected);
+					var actual = $.el(text)[0].outerHTML;
+					assert.ok(actual === expected, "$.el(" + JSON.stringify(text) + ")[0].outerHTML\nActual: " + JSON.stringify(actual) + "\nExpected: " + JSON.stringify(expected) + "");
 				});
 			}
 
-			function err(title, tag, expected) {
+			function err(title, text, expected) {
 				QUnit.test(title, function(assert) {
 					var actual;
 					try {
-						$.el(tag)[0].outerHTML;
+						$.el(text);
 					} catch (error) {
 						actual = error;
 					}
-					assert.ok(actual === expected, actual + " != " + expected);
+					assert.ok(actual === expected, "$.el(" + JSON.stringify(text) + ")\nActual: throws " + JSON.stringify(actual) + "\nExpected: throws " + JSON.stringify(expected) + "");
 				});
 			}
 			var undef;
@@ -41,6 +50,7 @@
 			eq("space", " ", '<div></div>');
 
 			eq("tag", "span", '<span></span>');
+			eq("tag unknown", "unknown", '<unknown></unknown>');
 			eq("tag spaces", " span ", '<span></span>');
 
 			eq("id", "#div", '<div id="div"></div>');
@@ -105,11 +115,9 @@
 			eq("checkbox", "input#id.class[type='checkbox' name='name' checked]", '<input id="id" class="class" type="checkbox" name="name" checked="checked">');
 
 			QUnit.test("append el", function(assert) {
-				var $div = $("<div/>");
-				$div.el("span");
-				var actual = $div[0].outerHTML;
+				var actual = $("<div/>").el("span").parent()[0].outerHTML;
 				var expected = "<div><span></span></div>";
-				assert.ok(actual === expected, actual + " != " + expected);
+				assert.ok(actual === expected, "$('<div/>').el('span').parent()[0].outerHTML\nActual: " + JSON.stringify(actual) + "\nExpected: " + JSON.stringify(expected));
 			});
 		</script>
 	</body>
