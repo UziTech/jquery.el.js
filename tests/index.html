@@ -80,7 +80,7 @@
 			eq("attr escaped single quotes in double quoted attr value", "[data-test=\"\\'test\"]", '<div data-test="\'test"></div>');
 			eq("attr multiple", "[data-test1='test1' data-test2='test2']", '<div data-test1="test1" data-test2="test2"></div>');
 			eq("attr multiple no strings", "[data-test1=test1 data-test2=test2]", '<div data-test1="test1" data-test2="test2"></div>');
-			eq("attr multiple brackets", "[data-test1='test1'][data-test2='test2']", '<div data-test1="test1" data-test2="test2"></div>');
+			eq("attr multiple groups", "[data-test1='test1'][data-test2='test2']", '<div data-test1="test1" data-test2="test2"></div>');
 			eq("attr empty", "[]", '<div></div>');
 			eq("attr empty value", "[data-test]", '<div data-test=""></div>');
 			eq("attr empty value before next attr", "[data-test data-test1='test1']", '<div data-test="" data-test1="test1"></div>');
@@ -103,6 +103,7 @@
 			err("attr invalid name char", "[:data-test]", "':' is not a valid attribute name character");
 
 			eq("text", "{test}", '<div>test</div>');
+			eq("text multiple", "{multiple}{ tests}", '<div>multiple tests</div>');
 			eq("text escaped }", "{test\\}}", '<div>test}</div>');
 			eq("text escaped \\", "{test\\\\}", '<div>test\\</div>');
 			eq("text non-escaped \\", "{test\\1}", '<div>test\\1</div>');
