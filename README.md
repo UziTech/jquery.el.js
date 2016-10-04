@@ -124,3 +124,7 @@ You can use these in any order with the exception of the tag which, if specified
 // <label for="checkme">Check This <input id="checkme" class="check" type="checkbox" name="checkme" checked="checked" /></label>
 $.el("label[for='checkme']{Check This }").el("input#checkme.check[type='checkbox' name='checkme' checked]", true);
 ```
+
+## Tests
+
+[Run Tests](https://rawgit.com/UziTech/jquery.el.js/master/tests/?coverage)
