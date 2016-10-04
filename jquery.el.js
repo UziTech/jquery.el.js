@@ -46,7 +46,10 @@
 			if (i < text.length) {
 				char = text[i];
 			} else {
-				attrs[attr.name.trim()] = attr.value.trim();	
+				if (attr.name.trim()) {
+					attrs[attr.name.trim()] = attr.value.trim();	
+				}
+				return;
 			}
 			if (inName) {
 				if (char === "=") {
