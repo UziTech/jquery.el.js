@@ -3,7 +3,7 @@
  * Repo: https://github.com/UziTech/jquery.el.js
  * License: MIT
  * Version: 0.1.0
- * 
+ *
  * simple way to create elements in jquery
  * example:
  * $.el("table#tab1[border=0]").el("tbody").el("tr.odd").el("td{text}");
@@ -289,7 +289,7 @@
 					} else if (/[^}]/.test(char)) {
 						token.value += char;
 					} else {
-						el.text = token.value;
+						el.text += token.value;
 						token = {
 							type: "next"
 						};
