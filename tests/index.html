@@ -120,6 +120,11 @@
 				var expected = "<div><span></span></div>";
 				assert.ok(actual === expected, "$('<div/>').el('span').parent()[0].outerHTML\nActual: " + JSON.stringify(actual) + "\nExpected: " + JSON.stringify(expected));
 			});
+			QUnit.test("return parent", function(assert) {
+				var actual = $.el().el("span", true)[0].outerHTML;
+				var expected = "<div><span></span></div>";
+				assert.ok(actual === expected, "$.el().el('span', true)[0].outerHTML\nActual: " + JSON.stringify(actual) + "\nExpected: " + JSON.stringify(expected));
+			});
 		</script>
 	</body>
 
