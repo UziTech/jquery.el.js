@@ -41,8 +41,13 @@
 			name: "",
 			value: ""
 		};
-		for (var i = 0; i < text.length; i++) {
-			var char = text[i];
+		for (var i = 0; i <= text.length; i++) {
+			var char = null;
+			if (i < text.length) {
+				char = text[i];
+			} else {
+				attrs[attr.name.trim()] = attr.value.trim();	
+			}
 			if (inName) {
 				if (char === "=") {
 					inName = false;
