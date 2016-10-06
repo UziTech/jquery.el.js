@@ -243,11 +243,7 @@
 						token.value += char;
 					} else {
 						if (!token.value) {
-							if (char === null) {
-								throw new Error("id cannot be empty");
-							} else {
-								throw new Error("'" + char + "' is not a valid id character");
-							}
+							throw new Error("id cannot be empty");
 						}
 						if (el.id) {
 							throw new Error("cannot have multiple ids");
@@ -274,11 +270,7 @@
 						token.value += char;
 					} else {
 						if (!token.value) {
-							if (char === null) {
-								throw new Error("class cannot be empty");
-							} else {
-								throw new Error("'" + char + "' is not a valid class character");
-							}
+							throw new Error("class cannot be empty");
 						}
 						el.classes.push(token.value);
 						token = startNextToken(char);
