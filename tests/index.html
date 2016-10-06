@@ -78,7 +78,6 @@
 			eq("non-escaped \\ before whitespace", "#div\\ .class", '<div id="div\\" class="class"></div>');
 			eq("\\ at end", "#div\\", '<div id="div\\"></div>');
 			err("empty", "#", "id cannot be empty");
-			err("empty", "# .asdf", "id cannot be empty");
 			err("multiple", "#div1#div2", "cannot have multiple ids");
 
 			QUnit.module("class");
