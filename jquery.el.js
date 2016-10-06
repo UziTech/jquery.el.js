@@ -2,7 +2,7 @@
  * Author: Tony Brix, https://Tony.Brix.ninja
  * Repo: https://github.com/UziTech/jquery.el.js
  * License: MIT
- * Version: 0.1.0
+ * Version: 0.2.0
  *
  * simple way to create elements in jquery
  * example:
