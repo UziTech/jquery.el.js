@@ -10,6 +10,10 @@
  */
 
 (function ($) {
+	function isStartTokenChar(char) {
+		return /[#\.\[\{]/.test(char);
+	}
+
 	function startNextToken(char) {
 		switch (char) {
 			case null:
@@ -205,7 +209,19 @@
 					}
 					break;
 				case "id":
-					if (char && /[\w-]/.test(char)) {
+					if (char === "\\") {
+						if (text.length > i + 1) {
+							var nextIdChar = text[i + 1];
+							if (nextIdChar === "\\" || isStartTokenChar(nextIdChar)) {
+								token.value += nextIdChar;
+								i++;
+							} else {
+								token.value += char;
+							}
+						} else {
+							token.value += char;
+						}
+					} else if (char && !isStartTokenChar(char)) {
 						token.value += char;
 					} else {
 						if (!token.value) {
@@ -224,7 +240,19 @@
 					}
 					break;
 				case "class":
-					if (char && /[\w-]/.test(char)) {
+					if (char === "\\") {
+						if (text.length > i + 1) {
+							var nextClassChar = text[i + 1];
+							if (nextClassChar === "\\" || isStartTokenChar(nextClassChar)) {
+								token.value += nextClassChar;
+								i++;
+							} else {
+								token.value += char;
+							}
+						} else {
+							token.value += char;
+						}
+					} else if (char && !isStartTokenChar(char)) {
 						token.value += char;
 					} else {
 						if (!token.value) {
