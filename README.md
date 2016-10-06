@@ -88,13 +88,11 @@ $.el(".class1.class2");
 
 ### Attributes
 
-Attributes must be surrounded by `[]`. There may be multiple attributes in one group or multiple attribute groups.
+Attributes must be surrounded by `[]`. There may be multiple attributes in one group and/or multiple attribute groups.
 
 ```javascript
 // <div data-test1="test1" data-test2="test2"></div>
 $.el("[data-test1='test1' data-test2='test2']");
-
-// <div data-test1="test1" data-test2="test2"></div>
 $.el("[data-test1='test1'][data-test2='test2']");
 ```
 
@@ -104,6 +102,7 @@ Text must be surrounded by `{}`. Multiple text nodes will be appended.
 
 ```javascript
 // <div>Hello World!</div>
+$.el("{Hello World!}");
 $.el("{Hello}{ World!}");
 ```
 
@@ -123,6 +122,20 @@ You can use these in any order with the exception of the tag which, if specified
 ```javascript
 // <label for="checkme">Check This <input id="checkme" class="check" type="checkbox" name="checkme" checked="checked" /></label>
 $.el("label[for='checkme']{Check This }").el("input#checkme.check[type='checkbox' name='checkme' checked]", true);
+```
+
+White space is allowed between tokens.
+
+```javascript
+// <div id="test" class="test1"></div>
+$.el("#test .test1");
+```
+
+Special characters must be escaped with \
+
+```javascript
+// <div class="test#1"></div>
+$.el(".test\\#1");
 ```
 
 ## Tests
