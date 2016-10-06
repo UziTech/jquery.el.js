@@ -11,10 +11,15 @@
 
 (function ($) {
 	function isStartTokenChar(char) {
-		return /[#\.\[\{]/.test(char);
+		return /[#\.\[\{\s]/.test(char);
 	}
 
 	function startNextToken(char) {
+		if (/\s/.test(char)) {
+			return {
+				type: "whitespace"
+			};
+		}
 		switch (char) {
 			case null:
 				return;
@@ -191,11 +196,16 @@
 				char = text[i];
 			}
 			switch (token.type) {
+				case "whitespace":
+					if (char && /\S/.test(char)) {
+						token = startNextToken(char);
+					}
+					break;
 				case "tag":
 					if (char === "\\") {
 						if (text.length > i + 1) {
 							var nextTagChar = text[i + 1];
-							if (nextTagChar === "\\" || isStartTokenChar(nextTagChar)) {
+							if (nextTagChar === "\\" || (isStartTokenChar(nextTagChar) && /\S/.test(nextTagChar))) {
 								token.value += nextTagChar;
 								i++;
 							} else {
@@ -208,6 +218,9 @@
 						token.value += char;
 					} else {
 						if (token.value) {
+							if (/^[0-9]/.test(token.value)) {
+								throw "Tag cannot start with a number.";
+							}
 							el.tag = token.value;
 						}
 						token = startNextToken(char);
@@ -217,7 +230,7 @@
 					if (char === "\\") {
 						if (text.length > i + 1) {
 							var nextIdChar = text[i + 1];
-							if (nextIdChar === "\\" || isStartTokenChar(nextIdChar)) {
+							if (nextIdChar === "\\" || (isStartTokenChar(nextIdChar) && /\S/.test(nextIdChar))) {
 								token.value += nextIdChar;
 								i++;
 							} else {
@@ -248,7 +261,7 @@
 					if (char === "\\") {
 						if (text.length > i + 1) {
 							var nextClassChar = text[i + 1];
-							if (nextClassChar === "\\" || isStartTokenChar(nextClassChar)) {
+							if (nextClassChar === "\\" || (isStartTokenChar(nextClassChar) && /\S/.test(nextClassChar))) {
 								token.value += nextClassChar;
 								i++;
 							} else {
