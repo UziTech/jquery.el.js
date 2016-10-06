@@ -27,7 +27,13 @@
 			function eq(title, text, expected) {
 				QUnit.test(title, function(assert) {
 					var actual = $.el(text)[0].outerHTML;
-					assert.deepEqual(actual, expected, "$.el(" + JSON.stringify(text) + ")[0].outerHTML\nActual: " + JSON.stringify(actual) + "\nExpected: " + JSON.stringify(expected) + "");
+					var test;
+					if (typeof text === "function") {
+						test = text.toString().replace(/\s+/g, " ");
+					} else {
+						test = JSON.stringify(text);
+					}
+					assert.deepEqual(actual, expected, "$.el(" + test + ")[0].outerHTML\nExpected: " + JSON.stringify(expected) + "\nActual: " + JSON.stringify(actual));
 				});
 			}
 
@@ -37,9 +43,9 @@
 					try {
 						$.el(text);
 					} catch (error) {
-						actual = error.message;
+						actual = (error.message ? error.message : error);
 					}
-					assert.deepEqual(actual, expected, "$.el(" + JSON.stringify(text) + ")\nActual: throws " + JSON.stringify(actual) + "\nExpected: throws " + JSON.stringify(expected) + "");
+					assert.deepEqual(actual, expected, "$.el(" + JSON.stringify(text) + ")\nExpected: throws " + JSON.stringify(expected) + "\nActual: throws " + JSON.stringify(actual));
 				});
 			}
 
@@ -47,14 +53,21 @@
 			eq("undefined", undef, '<div></div>');
 			eq("nothing", "", '<div></div>');
 			eq("space", " ", '<div></div>');
+			var rand = Math.random().toString(36).replace(/\W/g, "");
+			eq("function", function() {
+				return "#rand-" + rand;
+			}, '<div id="rand-' + rand + '"></div>');
+			eq("arrow function", _ => ("#rand-arrow-" + rand), '<div id="rand-arrow-' + rand + '"></div>');
 			err("number", 1, "Tag cannot start with a number.");
+			err("invalid start of token", "div !test", "'!' is not a valid start of a token");
 
 			QUnit.module("tag");
 			eq("regular", "span", '<span></span>');
 			eq("unknown", "unknown", '<unknown></unknown>');
 			eq("spaces", " span ", '<span></span>');
 			eq("escaped start token", "div\\.", '<div.></div.>');
-			err("invalid char", "div!", "Failed to execute 'createElement' on 'Document': The tag name provided ('div!') is not a valid name.");
+			err("\\ at end", "div\\", "Failed to execute 'createElement' on 'Document': The tag name provided ('div\\') is not a valid name.");
+			err("invalid char", "di\\v", "Failed to execute 'createElement' on 'Document': The tag name provided ('di\\v') is not a valid name.");
 
 			QUnit.module("id");
 			eq("single", "#div", '<div id="div"></div>');
@@ -63,7 +76,9 @@
 			eq("escaped start token", "#div\\#", '<div id="div#"></div>');
 			eq("escaped \\", "#div\\\\", '<div id="div\\"></div>');
 			eq("non-escaped \\ before whitespace", "#div\\ .class", '<div id="div\\" class="class"></div>');
+			eq("\\ at end", "#div\\", '<div id="div\\"></div>');
 			err("empty", "#", "id cannot be empty");
+			err("empty", "# .asdf", "id cannot be empty");
 			err("multiple", "#div1#div2", "cannot have multiple ids");
 
 			QUnit.module("class");
@@ -73,6 +88,7 @@
 			eq("escaped start token", ".div\\#", '<div class="div#"></div>');
 			eq("escaped \\", ".div\\\\", '<div class="div\\"></div>');
 			eq("non-escaped \\ before whitespace", ".div\\ .class", '<div class="div\\ class"></div>');
+			eq("\\ at end", ".div\\", '<div class="div\\"></div>');
 			err("empty", ".", "class cannot be empty");
 
 			QUnit.module("attr");
