@@ -199,7 +199,19 @@
 			}
 			switch (token.type) {
 				case "tag":
-					if (char && /\w/.test(char)) {
+					if (char === "\\") {
+						if (text.length > i + 1) {
+							var nextTagChar = text[i + 1];
+							if (nextTagChar === "\\" || isStartTokenChar(nextTagChar)) {
+								token.value += nextTagChar;
+								i++;
+							} else {
+								token.value += char;
+							}
+						} else {
+							token.value += char;
+						}
+					} else if (char && !isStartTokenChar(char)) {
 						token.value += char;
 					} else {
 						if (token.value) {
