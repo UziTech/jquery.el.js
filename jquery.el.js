@@ -173,13 +173,6 @@
 	}
 
 	function parseText(text) {
-		if (typeof text === "undefined") {
-			text = "";
-		}
-		if (typeof text !== "string") {
-			throw "invalid input";
-		}
-		text = text.trim();
 		var el = {
 			tag: "div",
 			id: null,
@@ -349,6 +342,13 @@
 	}
 
 	$.el = function (text) {
+		if (typeof text === "undefined" || text === null) {
+			text = "";
+		} else if (typeof text === "function") {
+			text = text.call(this);
+		}
+		// TODO: object
+		text = ("" + text).trim();
 		var el = parseText(text);
 		var $el = $("<" + el.tag + " />");
 		if (el.id) {
@@ -367,7 +367,7 @@
 	};
 
 	$.fn.el = function (text, returnParent) {
-		var $el = $.el(text).appendTo(this);
+		var $el = $.el.call(this, text).appendTo(this);
 		if (returnParent) {
 			return this;
 		}
