@@ -46,8 +46,8 @@
 			var undef;
 			eq("undefined", undef, '<div></div>');
 			eq("nothing", "", '<div></div>');
-			err("number", 1, "invalid input");
 			eq("space", " ", '<div></div>');
+			err("number", 1, "Tag cannot start with a number.");
 
 			QUnit.module("tag");
 			eq("regular", "span", '<span></span>');
@@ -56,17 +56,20 @@
 
 			QUnit.module("id");
 			eq("single", "#div", '<div id="div"></div>');
-			err("empty", "#", "id cannot be empty");
 			eq("spaces around", " #div ", '<div id="div"></div>');
+			eq("symbol char", "#div1!", '<div id="div1!"></div>');
+			eq("escaped start token", "#div\\#", '<div id="div#"></div>');
+			eq("escaped \\", "#div\\\\", '<div id="div\\"></div>');
+			err("empty", "#", "id cannot be empty");
 			err("multiple", "#div1#div2", "cannot have multiple ids");
-			err("invalid char", "#div1!", "'!' is not a valid start of a token");
-			err("invalid char", "#!div1", "'!' is not a valid id character");
 
 			QUnit.module("class");
 			eq("single", ".div", '<div class="div"></div>');
-			err("empty", ".", "class cannot be empty");
 			eq("multiple", ".div1.div2", '<div class="div1 div2"></div>');
-			err("invalid char", ".!div1", "'!' is not a valid class character");
+			eq("symbol char", ".div1!", '<div class="div1!"></div>');
+			eq("escaped start token", ".div\\#", '<div class="div#"></div>');
+			eq("escaped \\", ".div\\\\", '<div class="div\\"></div>');
+			err("empty", ".", "class cannot be empty");
 
 			QUnit.module("attr");
 			eq("no quote", "[data-test=test]", '<div data-test="test"></div>');
@@ -94,14 +97,14 @@
 			eq("non-escaped \\ in string at end of attr", "[data-test1='test\\ ]", '<div data-test1="test\\"></div>');
 			eq("non-escaped \\ not in string", "[data-test1=test\\1]", '<div data-test1="test\\1"></div>');
 			eq("non-escaped \\ not in string at end of attr", "[data-test1=test\\ ]", '<div data-test1="test\\"></div>');
-			err("non-escaped \\ at end of attr missing ]", "[data-test1=test\\", "missing ']' at end of attributes token");
-			err("missing ]", "[data-test1=test", "missing ']' at end of attributes token");
 			eq("escaped ]", "[data-test1='test1\\]']", '<div data-test1="test1]"></div>');
 			eq("escaped ] no quotes", "[data-test1=test1\\]]", '<div data-test1="test1]"></div>');
 			eq("escaped \\", "[data-test1='test1\\\\']", '<div data-test1="test1\\"></div>');
 			eq("escaped \\ no quotes", "[data-test1=test1\\\\]", '<div data-test1="test1\\"></div>');
 			eq("escaped \\ and ]", "[data-test1='test1\\\\\\]']", '<div data-test1="test1\\]"></div>');
 			eq("escaped \\ and ] no quotes", "[data-test1=test1\\\\\\]]", '<div data-test1="test1\\]"></div>');
+			err("non-escaped \\ at end of attr missing ]", "[data-test1=test\\", "missing ']' at end of attributes token");
+			err("missing ]", "[data-test1=test", "missing ']' at end of attributes token");
 			err("invalid name char after empty attr", "[data-test1 :data-test]", "':' is not a valid attribute name character");
 			err("invalid name char", "[d:ata-test]", "':' is not a valid attribute name character");
 			err("invalid name char", "[:data-test]", "':' is not a valid attribute name character");
@@ -112,14 +115,15 @@
 			eq("escaped }", "{test\\}}", '<div>test}</div>');
 			eq("escaped \\", "{test\\\\}", '<div>test\\</div>');
 			eq("non-escaped \\", "{test\\1}", '<div>test\\1</div>');
-			err("non-escaped \\ at end of text missing }", "{test\\", "missing '}' at end of text token");
 			eq("new line", "{te\nst}", '<div>te\nst</div>');
 			eq("spaces around", "{ test }", '<div> test </div>');
+			err("non-escaped \\ at end of text missing }", "{test\\", "missing '}' at end of text token");
 			err("missing }", "{test", "missing '}' at end of text token");
 
 			QUnit.module("typical");
 			eq("usual", "span#test.t1.t2[data-test1='test1' data-test2='test2']{text}", '<span id="test" class="t1 t2" data-test1="test1" data-test2="test2">text</span>');
 			eq("checkbox", "input#id.class[type='checkbox' name='name' checked]", '<input id="id" class="class" type="checkbox" name="name" checked="checked">');
+			eq("space between tokens", "input #id .class [type='checkbox' name='name' checked]", '<input id="id" class="class" type="checkbox" name="name" checked="checked">');
 
 			QUnit.module("advanced");
 			QUnit.test("append el", function(assert) {
