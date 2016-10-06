@@ -44,7 +44,7 @@
 					value: ""
 				};
 			default:
-				throw "'" + char + "' is not a valid start of a token";
+				throw new Error("'" + char + "' is not a valid start of a token");
 		}
 	}
 
@@ -80,12 +80,12 @@
 							if (/[\w-]/.test(char)) {
 								attr.name += char;
 							} else {
-								throw "'" + char + "' is not a valid attribute name character";
+								throw new Error("'" + char + "' is not a valid attribute name character");
 							}
 						} else if (/[\w-]/.test(char)) {
 							attr.name += char;
 						} else {
-							throw "'" + char + "' is not a valid attribute name character";
+							throw new Error("'" + char + "' is not a valid attribute name character");
 						}
 						break;
 					case "equals":
@@ -161,12 +161,12 @@
 							attr.name += char;
 							token = "name";
 						} else if (/[^\s]/.test(char)) {
-							throw "'" + char + "' is not a valid attribute name character";
+							throw new Error("'" + char + "' is not a valid attribute name character");
 						}
 						break;
 					default:
 						// this should never happen
-						throw "'" + token + "' is an invalid token";
+						throw new Error("'" + token + "' is an invalid token");
 				}
 			} else {
 				if (attr.name) {
@@ -219,7 +219,7 @@
 					} else {
 						if (token.value) {
 							if (/^[0-9]/.test(token.value)) {
-								throw "Tag cannot start with a number.";
+								throw new Error("Tag cannot start with a number.");
 							}
 							el.tag = token.value;
 						}
@@ -244,13 +244,13 @@
 					} else {
 						if (!token.value) {
 							if (char === null) {
-								throw "id cannot be empty";
+								throw new Error("id cannot be empty");
 							} else {
-								throw "'" + char + "' is not a valid id character";
+								throw new Error("'" + char + "' is not a valid id character");
 							}
 						}
 						if (el.id) {
-							throw "cannot have multiple ids";
+							throw new Error("cannot have multiple ids");
 						} else {
 							el.id = token.value;
 							token = startNextToken(char);
@@ -275,9 +275,9 @@
 					} else {
 						if (!token.value) {
 							if (char === null) {
-								throw "class cannot be empty";
+								throw new Error("class cannot be empty");
 							} else {
-								throw "'" + char + "' is not a valid class character";
+								throw new Error("'" + char + "' is not a valid class character");
 							}
 						}
 						el.classes.push(token.value);
@@ -286,7 +286,7 @@
 					break;
 				case "attrs":
 					if (char === null) {
-						throw "missing ']' at end of attributes token";
+						throw new Error("missing ']' at end of attributes token");
 					} else if (char === "\\") {
 						if (text.length > i + 1) {
 							var nextAttrChar = text[i + 1];
@@ -316,7 +316,7 @@
 					break;
 				case "text":
 					if (char === null) {
-						throw "missing '}' at end of text token";
+						throw new Error("missing '}' at end of text token");
 					} else if (char === "\\") {
 						if (text.length > i + 1) {
 							var nextTextChar = text[i + 1];
@@ -348,7 +348,7 @@
 					break;
 				default:
 					// this should never happen
-					throw "'" + token.type + "' is not a valid token type";
+					throw new Error("'" + token.type + "' is not a valid token type");
 			}
 		}
 		return el;
