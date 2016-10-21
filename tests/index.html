@@ -155,6 +155,41 @@
 				var expected = "<div><span></span></div>";
 				assert.ok(actual === expected, "$.el().el('span', true)[0].outerHTML\nActual: " + JSON.stringify(actual) + "\nExpected: " + JSON.stringify(expected));
 			});
+
+			QUnit.module("time");
+			QUnit.test("el 10000 times", function(assert) {
+				assert.expect(0);
+				for (var i = 0; i < 10000; i++) {
+					var $input = $.el(`textarea#text.text[data-text='text' disabled]{text}`);
+				}
+			});
+			QUnit.test("jquery 10000 times", function(assert) {
+				assert.expect(0);
+				for (let i = 0; i < 10000; i++) {
+					const $input = $("<textarea />")
+						.attr({
+							id: "text",
+							"data-text": "text"
+						})
+						.addClass("text")
+						.prop({
+							disabled: true
+						})
+						.text("text");
+				}
+			});
+			QUnit.test("dom 10000 times", function(assert) {
+				assert.expect(0);
+				for (let i = 0; i < 10000; i++) {
+					const input = document.createElement("input");
+					input.setAttribute("id", "text");
+					input.setAttribute("data-text", "text");
+					input.className = "text";
+					input.setAttribute("disabled", "disabled");
+					input.textContent = "text";
+					const $input = $(input);
+				}
+			});
 		</script>
 	</body>
 
