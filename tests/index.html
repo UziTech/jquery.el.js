@@ -148,46 +148,70 @@
 			QUnit.test("append el", function(assert) {
 				var actual = $("<div/>").el("span").parent()[0].outerHTML;
 				var expected = "<div><span></span></div>";
-				assert.ok(actual === expected, "$('<div/>').el('span').parent()[0].outerHTML\nActual: " + JSON.stringify(actual) + "\nExpected: " + JSON.stringify(expected));
+				assert.deepEqual(actual, expected, "$('<div/>').el('span').parent()[0].outerHTML\nActual: " + JSON.stringify(actual) + "\nExpected: " + JSON.stringify(expected));
 			});
 			QUnit.test("return parent", function(assert) {
 				var actual = $.el().el("span", true)[0].outerHTML;
 				var expected = "<div><span></span></div>";
-				assert.ok(actual === expected, "$.el().el('span', true)[0].outerHTML\nActual: " + JSON.stringify(actual) + "\nExpected: " + JSON.stringify(expected));
+				assert.deepEqual(actual, expected, "$.el().el('span', true)[0].outerHTML\nActual: " + JSON.stringify(actual) + "\nExpected: " + JSON.stringify(expected));
 			});
 
-			QUnit.module("time");
-			QUnit.test("el 10000 times", function(assert) {
-				assert.expect(0);
-				for (var i = 0; i < 10000; i++) {
-					var $input = $.el(`textarea#text.text[data-text='text' disabled]{text}`);
-				}
-			});
-			QUnit.test("jquery 10000 times", function(assert) {
-				assert.expect(0);
-				for (let i = 0; i < 10000; i++) {
-					const $input = $("<textarea />")
-						.attr({
-							id: "text",
-							"data-text": "text"
-						})
-						.addClass("text")
-						.prop({
-							disabled: true
-						})
-						.text("text");
-				}
-			});
-			QUnit.test("dom 10000 times", function(assert) {
-				assert.expect(0);
-				for (let i = 0; i < 10000; i++) {
-					const input = document.createElement("input");
-					input.setAttribute("id", "text");
-					input.setAttribute("data-text", "text");
-					input.className = "text";
-					input.setAttribute("disabled", "disabled");
-					input.textContent = "text";
-					const $input = $(input);
+			// test time if all other tests pass
+			var done = false;
+			QUnit.done(function(details) {
+				if (!done && details.failed === 0) {
+					done = true;
+					QUnit.module("time");
+					QUnit.test("el 10000 times", function(assert) {
+						for (var i = 0; i < 10000; i++) {
+							var $input = $.el("textarea#text.text[data-text='text' disabled]{text}");
+						}
+						assert.ok(true, "var $input = $.el(\"textarea#text.text[data-text='text' disabled]{text}\");");
+					});
+					QUnit.test("jquery 10000 times", function(assert) {
+						for (let i = 0; i < 10000; i++) {
+							var $input = $("<textarea />")
+								.attr({
+									id: "text",
+									"data-text": "text"
+								})
+								.addClass("text")
+								.prop({
+									disabled: true
+								})
+								.text("text");
+						}
+						assert.ok(true,
+							"var $input = $(\"<textarea />\")\n" +
+							"	.attr({\n" +
+							"		id: \"text\",\n" +
+							"		\"data-text\": \"text\"\n" +
+							"	})\n" +
+							"	.addClass(\"text\")\n" +
+							"	.prop({\n" +
+							"		disabled: true\n" +
+							"	})\n" +
+							"	.text(\"text\");");
+					});
+					QUnit.test("dom 10000 times", function(assert) {
+						for (let i = 0; i < 10000; i++) {
+							var input = document.createElement("input");
+							input.setAttribute("id", "text");
+							input.setAttribute("data-text", "text");
+							input.className = "text";
+							input.setAttribute("disabled", "disabled");
+							input.textContent = "text";
+							var $input = $(input);
+						}
+						assert.ok(true,
+							"var input = document.createElement(\"input\");\n" +
+							"input.setAttribute(\"id\", \"text\");\n" +
+							"input.setAttribute(\"data-text\", \"text\");\n" +
+							"input.className = \"text\";\n" +
+							"input.setAttribute(\"disabled\", \"disabled\");\n" +
+							"input.textContent = \"text\";\n" +
+							"var $input = $(input);");
+					});
 				}
 			});
 		</script>
