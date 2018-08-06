@@ -11,7 +11,7 @@
 
 (function ($) {
 	function isStartTokenChar(char) {
-		return /[#\.\[\{\s]/.test(char);
+		return /[#.[{\s]/.test(char);
 	}
 
 	function startNextToken(char) {
@@ -357,7 +357,7 @@
 		var el = parseText(text);
 		var $el = $("<" + el.tag + " />");
 		if (el.id) {
-			$el.attr({ id: el.id });
+			$el.attr({id: el.id});
 		}
 		if (el.classes.length > 0) {
 			$el.addClass(el.classes.join(" "));

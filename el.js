@@ -11,7 +11,7 @@
 
 (function (doc) {
 	function isStartTokenChar(char) {
-		return /[#\.\[\{\s]/.test(char);
+		return /[#.[{\s]/.test(char);
 	}
 
 	function startNextToken(char) {
@@ -178,7 +178,7 @@
 	}
 
 	function parseText(text) {
-		var el = {
+		var parsed = {
 			tag: "div",
 			id: null,
 			classes: [],
@@ -221,7 +221,7 @@
 							if (/^[0-9]/.test(token.value)) {
 								throw new Error("Tag cannot start with a number.");
 							}
-							el.tag = token.value;
+							parsed.tag = token.value;
 						}
 						token = startNextToken(char);
 					}
@@ -245,10 +245,10 @@
 						if (!token.value) {
 							throw new Error("id cannot be empty");
 						}
-						if (el.id) {
+						if (parsed.id) {
 							throw new Error("cannot have multiple ids");
 						} else {
-							el.id = token.value;
+							parsed.id = token.value;
 							token = startNextToken(char);
 						}
 					}
@@ -272,7 +272,7 @@
 						if (!token.value) {
 							throw new Error("class cannot be empty");
 						}
-						el.classes.push(token.value);
+						parsed.classes.push(token.value);
 						token = startNextToken(char);
 					}
 					break;
@@ -300,7 +300,7 @@
 					} else if (/[^\]]/.test(char)) {
 						token.value += char;
 					} else {
-						parseAttrs(el.attrs, token.value);
+						parseAttrs(parsed.attrs, token.value);
 						token = {
 							type: "next"
 						};
@@ -327,7 +327,7 @@
 					} else if (/[^}]/.test(char)) {
 						token.value += char;
 					} else {
-						el.text += token.value;
+						parsed.text += token.value;
 						token = {
 							type: "next"
 						};
@@ -355,31 +355,31 @@
 		// TODO: object
 		text = ("" + text).trim();
 		var parsed = parseText(text);
-		var $el = doc.createElement(parsed.tag);
+		var created = doc.createElement(parsed.tag);
 		if (parsed.id) {
-			$el.setAttribute("id", parsed.id);
+			created.setAttribute("id", parsed.id);
 		}
 		if (parsed.classes.length > 0) {
-			$el.classList.add.call($el, parsed.classes);
+			created.classList.add.call(created, parsed.classes);
 		}
 		if (parsed.attrs) {
 			for (var attr in parsed.attrs) {
-				$el.setAttribute(attr, parsed.attrs[attr]);
+				created.setAttribute(attr, parsed.attrs[attr]);
 			}
 		}
 		if (parsed.text) {
-			$el.textContent = parsed.text;
+			created.textContent = parsed.text;
 		}
-		$el.el = el;
+		created.el = el;
 
 		if (this instanceof HTMLElement) {
-			this.appendChild($el);
+			this.appendChild(created);
 		}
 
 		if (returnParent) {
 			return this;
 		}
-		return $el;
+		return created;
 	}
 
 	doc.el = el;
