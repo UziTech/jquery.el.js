@@ -370,7 +370,6 @@
 		if (parsed.text) {
 			created.textContent = parsed.text;
 		}
-		created.el = el;
 
 		if (this instanceof HTMLElement) {
 			this.appendChild(created);
@@ -381,6 +380,8 @@
 		}
 		return created;
 	}
+
+	HTMLElement.prototype.el = el;
 
 	doc.el = el;
 })(document);
