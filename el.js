@@ -343,7 +343,7 @@
 					throw new Error("'" + token.type + "' is not a valid token type");
 			}
 		}
-		return el;
+		return parsed;
 	}
 
 	function el(text, returnParent) {
@@ -360,7 +360,7 @@
 			created.setAttribute("id", parsed.id);
 		}
 		if (parsed.classes.length > 0) {
-			created.classList.add.call(created, parsed.classes);
+			created.classList.add.apply(created.classList, parsed.classes);
 		}
 		if (parsed.attrs) {
 			for (var attr in parsed.attrs) {
